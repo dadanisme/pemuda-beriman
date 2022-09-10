@@ -6,7 +6,7 @@ export default async function login(email: string, password: string) {
 
   let result: {
     success: boolean;
-    user?: Object;
+    user?: any;
     errorCode?: string;
     errorMessage?: string;
   } = {

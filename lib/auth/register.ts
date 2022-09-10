@@ -6,7 +6,7 @@ export default async function register(email: string, password: string) {
 
   let result: {
     success: boolean;
-    user?: Object;
+    user?: any;
     errorCode?: string;
     errorMessage?: string;
   } = {
@@ -31,4 +31,5 @@ export default async function register(email: string, password: string) {
         errorMessage,
       };
     });
+  return result;
 }

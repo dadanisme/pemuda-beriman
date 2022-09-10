@@ -25,7 +25,7 @@ const Toastr: React.FC = () => {
     <div
       className={
         "fixed top-3 z-20 max-w-96 " +
-        (["login", "register"].includes(router.pathname)
+        (["/login", "/register"].includes(router.pathname)
           ? "left-1/2 md:left-1/4 -translate-x-1/2"
           : "md:right-3 right-1/2 translate-x-1/2 md:translate-x-0")
       }

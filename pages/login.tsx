@@ -16,6 +16,7 @@ const SideImage = dynamic(() => import("../components/login/SideImage"), {
 const Login: NextPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loggingIn, setLoggingIn] = useState<boolean>(false);
 
   const togglePassword: MouseEventHandler<HTMLButtonElement> = () => {
     setShowPassword(!showPassword);
@@ -29,7 +30,7 @@ const Login: NextPage = () => {
         router.push("/");
       }
     });
-  }, []);
+  }, [router]);
 
   // prettier-ignore
   const handleSubmit: MouseEventHandler<HTMLFormElement> = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,8 +38,9 @@ const Login: NextPage = () => {
     const email = e.currentTarget.email.value;
     const password = e.currentTarget.password.value;
 
+    setLoggingIn(true);
     const res = await login(email, password);
-    
+    setLoggingIn(false);
     if(res.success) {
       toast('Login success', 'success');
       router.push("/");
@@ -149,12 +151,13 @@ const Login: NextPage = () => {
             w-full md:w-auto px-5 py-3 text-center dark:bg-red-600 active:bg-main-yellow
             active:text-gray-700
             dark:hover:bg-main-red dark:focus:ring-main-red"
+            disabled={loggingIn}
           >
-            Login
+            {loggingIn ? "Logging in..." : "Login"}
           </button>
           <div className="mt-4">
             <p className="text-sm text-gray-400 md:text-center">
-              Don't have an account? &nbsp;
+              Don&apos;t have an account? &nbsp;
               <Link href="/register">
                 <a
                   className="text-main-red hover:text-main-red font-semibold

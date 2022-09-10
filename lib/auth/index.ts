@@ -1,4 +1,4 @@
 import login from "./login";
 import register from "./register";
-
-export { login, register };
+import logout from "./logout";
+export { login, register, logout };

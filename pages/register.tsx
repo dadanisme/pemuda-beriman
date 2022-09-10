@@ -1,35 +1,67 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { MouseEventHandler, Suspense, useState } from "react";
+import { MouseEventHandler, Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-import { login } from "../lib/auth";
+import { register } from "../lib/auth";
+import toastr from "../lib/toastr";
+import { getAuth } from "firebase/auth";
+import { useRouter } from "next/router";
+import app from "../lib/firebase";
 
 const SideImage = dynamic(() => import("../components/login/SideImage"), {
   ssr: false,
 });
 
 const Register: NextPage = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [rePassword, setRePassword] = useState<string>("");
+  const [isRegistering, setIsRegistering] = useState<boolean>(false);
 
   const togglePassword: MouseEventHandler<HTMLButtonElement> = () => {
     setShowPassword(!showPassword);
   };
 
+  useEffect(() => {
+    const auth = getAuth(app);
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        toastr("Logout first if you want to register", "info");
+        router.push("/");
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (password !== rePassword && rePassword !== "") {
+      toastr("Password doesn't match", "error");
+    } else if (password !== "" && rePassword !== "") {
+      toastr("Password match", "success");
+    }
+
+    if (password.length < 6 && password !== "") {
+      toastr("Password must be at least 6 characters", "error");
+    }
+  }, [password, rePassword]);
+
   // prettier-ignore
   const handleSubmit: MouseEventHandler<HTMLFormElement> = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const email = e.currentTarget.email.value;
-    const password = e.currentTarget.password.value;
-
-    const res = await login(email, password);
-    
-    if(res.success) {
-      window.location.href = "/";
+    if (password !== rePassword) {
+      toastr("Password doesn't match", "error");
     } else {
-      alert(res.errorMessage);
+      setIsRegistering(true);
+      const res = await register(email, password);
+      setIsRegistering(false);
+      if(res.success) {
+        toastr("Register successfully, now logged in", "success");
+      } else {
+        toastr(res.errorMessage, "error");
+      }
     }
-
   };
 
   return (
@@ -66,6 +98,8 @@ const Register: NextPage = () => {
               dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-main-red 
               dark:focus:border-main-red"
               placeholder="pemuda@beriman.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -86,6 +120,8 @@ const Register: NextPage = () => {
                 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-main-red 
                 dark:focus:border-main-red pr-10"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <div className="absolute">
                 <button
@@ -114,6 +150,8 @@ const Register: NextPage = () => {
                 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-main-red 
                 dark:focus:border-main-red pr-10"
                 required
+                value={rePassword}
+                onChange={(e) => setRePassword(e.target.value)}
               />
               <div className="absolute">
                 <button
@@ -133,8 +171,9 @@ const Register: NextPage = () => {
             w-full md:w-auto px-5 py-3 text-center dark:bg-red-600 active:bg-main-yellow
             active:text-gray-700
             dark:hover:bg-main-red dark:focus:ring-main-red"
+            disabled={isRegistering}
           >
-            Register
+            {isRegistering ? "Registering..." : "Register"}
           </button>
           <div className="mt-4">
             <p className="text-sm text-gray-400 md:text-center">
